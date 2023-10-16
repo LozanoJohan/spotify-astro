@@ -2,17 +2,16 @@ import { useState, useRef, useEffect } from "react"
 import { usePlayerStore } from '../store/playerStore'
 import { Slider } from "./Slider"
 
-export const Pause = () => (
-    <svg role="img" className="h-8 w-8" aria-hidden="true" viewBox="0 0 16 16"
+export const Pause = ({ className }) => (
+    <svg role="img" width="16" height="16" className={className} aria-hidden="true" viewBox="0 0 16 16"
     ><path
         d="M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z"
     ></path></svg>
 
 )
 
-export const Play = () => (
-    <svg viewBox="0 0 24 24" className="h-8 w-8"
-    ><path d="M8 5.14v14l11-7-11-7z"></path></svg>
+export const Play = ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" width="16" height="16" ><path d="M8 5.14v14l11-7-11-7z"></path></svg>
 )
 
 export const VolumeSilence = () => (
@@ -83,6 +82,49 @@ const VolumeControl = () => {
     )
 }
 
+const SongControl = ({ audio }) => {
+
+    const [currentTime, setCurrentTime] = useState(0)
+
+    useEffect(() => {
+        audio.current.addEventListener('timeupdate', handleTimeUpdate)
+
+        return () => {
+            audio.current.removeEventListener('timeupdate', handleTimeUpdate)
+        }
+    }, [])
+
+    const handleTimeUpdate = () => {
+        setCurrentTime(audio.current.currentTime)
+    }
+
+    const formatTime = time => {
+        if (!time) return '0:00'
+
+        const seconds = Math.floor(time % 60)
+        const minutes = Math.floor(time / 60)
+
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`
+    }
+
+    const duration = audio?.current.duration ?? 0
+    return (
+        <div className="flex gap-x-3 text-xs ">
+            <span className="opacity-50 w-12 text-right">{formatTime(currentTime)}</span>
+            <Slider
+                defaultValue={[0]}
+                max={audio?.current.duration ?? 0}
+                min={0}
+                className="w-[500px]"
+                value={[currentTime]}
+                onValueChange={(value) => {
+                    audio.current.currentTime = value
+                }} />
+            <span className="opacity-50 w-12">{formatTime(duration)}</span>
+        </div>
+    )
+}
+
 export function Player() {
 
     const { currentMusic, isPlaying, setIsPlaying, volume } = usePlayerStore(state => state)
@@ -128,11 +170,12 @@ export function Player() {
                     <CurrentSong {...currentMusic.song} />
                 </div>
                 <div className="grid place-content-center gap-4 flex-1">
-                    <div className="flex justify-center">
+                    <div className="flex flex-col justify-center gap-3 items-center">
                         <button className="bg-white rounded-full p-2"
                             onClick={handleClick}>
                             {isPlaying ? <Pause /> : <Play />}
                         </button>
+                        <SongControl audio={audioRef} />
                     </div>
                 </div>
                 <div className="grid place-content-center">

@@ -1,4 +1,6 @@
 ---
+import { CardPlayButton } from "../../components/CardPlayButton";
+import MusicTable from "../../components/MusicTable.astro";
 import Layout from "../../layouts/Layout.astro";
 import { allPlaylists, playlists, songs } from "../../lib/data";
 
@@ -51,12 +53,18 @@ const playListSongs = songs.filter(
                 </div>
             </div>
         </header>
+        <div class="pl-6 pt-6">
+            <CardPlayButton size="lg" id={id} client:load/>
+        </div>
+        <div class="relative z-10 px-6 pt-10"></div>
+        <div
+            class="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/80 -z-[1]"
+        >
+        </div>
+        <div class="p-6">
+            <MusicTable songs={playListSongs} />
+        </div>
     </div>
-    <div class="relative z-10 px-6 pt-10"></div>
-    <div
-      class="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/80 -z-[1]"
-    >
-    </div>
-</Layout>
 
-<style></style>
+    <style></style>
+</Layout>
